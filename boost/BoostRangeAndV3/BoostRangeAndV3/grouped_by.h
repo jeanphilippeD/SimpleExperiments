@@ -43,8 +43,21 @@ namespace boost
             : public group_by_iterator_base_gen< Pred, Iter >::base_t
         {
             typedef typename group_by_iterator_base_gen< Pred, Iter >::base_t super_t;
+
+            struct negated_pred
+            {
+                explicit negated_pred( Pred pred ) : m_pred( pred ) {}
+
+                template < typename T >
+                bool operator()( const T& v1, const T& v2 )
+                {
+                    return !m_pred( v1, v2 );
+                }
+
+                Pred m_pred;
+            };
             typedef
-                typename skip_iterator< Iter, binary_negate< Pred >, true /* default_pass */ >
+                typename skip_iterator< Iter, negated_pred, true /* default_pass */ >
                     increment_iterator;
 
             friend class ::boost::iterator_core_access;
@@ -56,7 +69,7 @@ namespace boost
             group_by_iterator() : m_it(), m_next() {}
 
             group_by_iterator( pred_t p, iter_t it, iter_t last )
-            : m_it( it ), m_next( it, last,  not2( p ) )
+            : m_it( it ), m_next( it, last, negated_pred( p ) )
             {
                 increment();
             }
@@ -98,6 +111,7 @@ namespace boost
             //typedef iterator_range< skip_iter > base_range;
 
         public:
+            //group_by_range() {}
             group_by_range( const Pred& p, Range& r )
             : iterator_range( iterator( p, boost::begin( r ), boost::end( r ) ),
                               iterator( p, boost::end( r ), boost::end( r ) ) )

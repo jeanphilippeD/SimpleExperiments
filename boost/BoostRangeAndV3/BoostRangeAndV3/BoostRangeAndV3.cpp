@@ -50,20 +50,43 @@ auto dates( unsigned short start, unsigned short stop )
 
 
 auto by_month() {
-    return boost::adaptors::grouped_by( boost::function< bool( date, date ) >(
-        []( date a, date b ) { return a.month() == b.month(); } ) );
+    return boost::adaptors::grouped_by(
+        []( date a, date b ) { return a.month() == b.month(); } );
 }
 
+
+auto by_week() {
+    // Mon-Sun
+    return boost::adaptors::grouped_by(
+        []( date a, date b ) { return a.week_number() == b.week_number(); } );
+}
+
+auto month_by_week()
+{
+    return boost::adaptors::transformed(
+        [](auto month){ return month | by_week(); }
+        );
+}
 
 //#define RUN_TEST 1
 #ifndef RUN_TEST
 int main()
 {
-    for (auto val : dates(2015, 2016) | by_month())
+ 
+    for (auto months : dates(2015, 2016) | by_month() | month_by_week())
     {
-        std::cout << *boost::begin(val) << std::endl;
+        for (auto week : months )
+        {
+            for (auto day : week)
+            {
+                std::cout << day.day() << " ";
+            }
+            std::cout << "\n";
+        }
+        std::cout << "---------------------------\n";
     }
 
+    std::cout << std::endl;
     return 0;
 }
 #endif
