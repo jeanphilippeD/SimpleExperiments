@@ -162,7 +162,7 @@ namespace boost
         }
 
         template < class ForwardRng, class BinPredicate >
-        inline group_by_range< BinPredicate, const ForwardRng > stride(
+        inline group_by_range< BinPredicate, const ForwardRng > group_by(
             const ForwardRng& rng,
             BinPredicate group_by_pred )
         {
