@@ -1,15 +1,5 @@
-// Boost.Range library
-//
-//  Copyright Neil Groves 2007. Use, modification and
-//  distribution is subject to the Boost Software License, Version
-//  1.0. (See accompanying file LICENSE_1_0.txt or copy at
-//  http://www.boost.org/LICENSE_1_0.txt)
-//
-//
-// For more information, see http://www.boost.org/libs/range/
-//
-#ifndef BOOST_RANGE_ADAPTOR_GROUP_BY_HPP_INCLUDED
-#define BOOST_RANGE_ADAPTOR_GROUP_BY_HPP_INCLUDED
+#ifndef BOOST_RANGE_ADAPTOR_GROUPED_BY_HPP_INCLUDED
+#define BOOST_RANGE_ADAPTOR_GROUPED_BY_HPP_INCLUDED
 
 #include <boost/range/adaptor/adjacent_filtered.hpp>
 #include <boost/range/adaptor/argument_fwd.hpp>
