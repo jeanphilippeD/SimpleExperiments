@@ -2,10 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "boost\range.hpp"
-#include "boost\range\counting_range.hpp"
-#include "boost\range\adaptors.hpp"
+#include "grouped_by.h"
 #include "boost\date_time\gregorian\gregorian.hpp"
+#include "boost\function.hpp"
+#include "boost\range.hpp"
+#include "boost\range\adaptors.hpp"
+#include "boost\range\counting_range.hpp"
+#include "boost\range\algorithm\copy.hpp"
 #include <vector>
 #include <iostream>
 
@@ -45,12 +48,22 @@ auto dates( unsigned short start, unsigned short stop )
                                   date{stop, greg::Jan, 1} );
 }
 
+
+auto by_month() {
+    return boost::adaptors::grouped_by( boost::function< bool( date, date ) >(
+        []( date a, date b ) { return a.month() == b.month(); } ) );
+}
+
+
+//#define RUN_TEST 1
+#ifndef RUN_TEST
 int main()
 {
-    for ( auto val : dates( 2015, 2016 ) )
+    for (auto val : dates(2015, 2016) | by_month())
     {
-        std::cout << val << std::endl;
+        std::cout << *boost::begin(val) << std::endl;
     }
 
     return 0;
 }
+#endif
