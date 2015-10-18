@@ -1,0 +1,1 @@
+Trying to get Eric Niebler CppCon calendar example building on boost library range and adaptors.
