@@ -32,7 +32,8 @@ namespace boost
         class group_by_iterator
             : public group_by_iterator_base_gen< Pred, Iter >::base_t
         {
-            typedef typename group_by_iterator_base_gen< Pred, Iter >::base_t super_t;
+            typedef typename group_by_iterator_base_gen< Pred, Iter >::base_t
+                super_t;
 
             struct negated_pred
             {
@@ -46,9 +47,10 @@ namespace boost
 
                 Pred m_pred;
             };
-            typedef
-                typename skip_iterator< Iter, negated_pred, true /* default_pass */ >
-                    increment_iterator;
+            typedef typename skip_iterator< Iter,
+                                            negated_pred,
+                                            true /* default_pass */ >
+                increment_iterator;
 
             friend class ::boost::iterator_core_access;
 
@@ -68,7 +70,7 @@ namespace boost
             void increment()
             {
                 m_it = m_next.base();
-                if (m_next.base() != m_next.m_last)
+                if ( m_next.base() != m_next.m_last )
                 {
                     ++m_next;
                 }
@@ -95,13 +97,14 @@ namespace boost
                                      typename range_iterator< Range >::type > >
         {
         private:
-            //typedef group_by_iterator< Pred,
-            //                           typename range_iterator< Range >::type >
+            // typedef group_by_iterator< Pred,
+            //                           typename range_iterator< Range >::type
+            //                           >
             //    group_by_iter;
-            //typedef iterator_range< skip_iter > base_range;
+            // typedef iterator_range< skip_iter > base_range;
 
         public:
-            //group_by_range() {}
+            // group_by_range() {}
             group_by_range( const Pred& p, Range& r )
             : iterator_range( iterator( p, boost::begin( r ), boost::end( r ) ),
                               iterator( p, boost::end( r ), boost::end( r ) ) )
@@ -116,24 +119,26 @@ namespace boost
             explicit group_by_holder( Pred value ) : holder< Pred >( value ) {}
         };
 
-        template< class ForwardRng, class BinPredicate >
+        template < class ForwardRng, class BinPredicate >
         inline group_by_range< BinPredicate, ForwardRng > operator|(
             ForwardRng& rng,
             const group_by_holder< BinPredicate >& pred )
         {
-            //BOOST_RANGE_CONCEPT_ASSERT((ForwardRangeConcept<ForwardRng>));
+            BOOST_RANGE_CONCEPT_ASSERT( (ForwardRangeConcept< ForwardRng >));
 
             return group_by_range< BinPredicate, ForwardRng >( pred.val, rng );
         }
 
-        template< class ForwardRng, class BinPredicate >
+        template < class ForwardRng, class BinPredicate >
         inline group_by_range< BinPredicate, const ForwardRng > operator|(
             const ForwardRng& rng,
             const group_by_holder< BinPredicate >& pred )
         {
-            //BOOST_RANGE_CONCEPT_ASSERT((ForwardRangeConcept<const ForwardRng>));
+            BOOST_RANGE_CONCEPT_ASSERT(
+                (ForwardRangeConcept< const ForwardRng >));
 
-            return group_by_range< BinPredicate, const ForwardRng >( pred.val, rng );
+            return group_by_range< BinPredicate, const ForwardRng >( pred.val,
+                                                                     rng );
         }
 
     } // namespace range_detail

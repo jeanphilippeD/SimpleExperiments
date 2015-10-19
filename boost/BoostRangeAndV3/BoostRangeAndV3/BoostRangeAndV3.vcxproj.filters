@@ -19,10 +19,14 @@
     <ClInclude Include="action\joined.h">
       <Filter>action</Filter>
     </ClInclude>
+    <ClInclude Include="iota.h" />
+    <ClInclude Include="date_by_day.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="BoostRangeAndV3.cpp" />
     <ClCompile Include="grouped_by.cpp" />
+    <ClCompile Include="iota.cpp" />
+    <ClCompile Include="date_by_day.cpp" />
   </ItemGroup>
 </Project>

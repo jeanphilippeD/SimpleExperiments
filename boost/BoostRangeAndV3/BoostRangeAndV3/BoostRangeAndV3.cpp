@@ -2,49 +2,37 @@
 //
 
 #include "stdafx.h"
-#include "grouped_by.h"
 #include "action\joined.h"
+#include "date_by_day.h"
+#include "grouped_by.h"
+#include "iota.h"
 #include "boost\date_time\gregorian\gregorian.hpp"
 #include "boost\format.hpp"
 #include "boost\range.hpp"
 #include "boost\range\adaptors.hpp"
-#include "boost\range\counting_range.hpp"
 #include "boost\range\algorithm\copy.hpp"
+#include "boost\range\join.hpp"
 #include <vector>
 #include <iostream>
+
+void run_grouped_by_test();
+void run_date_by_day_test();
+void run_iota_test();
 
 namespace greg = boost::gregorian;
 using date = greg::date;
 using day = greg::date_duration;
-
-namespace boost
-{
-    namespace gregorian
-    {
-        date& operator++( date& d ) { return d = d + day( 1 ); }
-        date operator++( date& d, int ) { return ++d - day( 1 ); }
-        date& operator--( date& d ) { return d = d - day( 1 ); }
-        date operator--( date& d, int ) { return --d + day( 1 ); }
-    }
-
-    namespace iterators
-    {
-        template <>
-        struct iterator_traversal< date >
-        {
-            typedef boost::iterators::bidirectional_traversal_tag type;
-        };
-
-        template <>
-        struct iterator_difference< date >
-        {
-            typedef day type;
-        };
-    }
-}
+using namespace date_ext;
 
 namespace
 {
+    void run_tests()
+    {
+        run_grouped_by_test();
+        run_date_by_day_test();
+        run_iota_test();
+    }
+
     // return by value, not the most efficient but safer.
     template < typename RangeT >
     typename RangeT::value_type front( const RangeT& range )
@@ -58,76 +46,123 @@ namespace action
 {
     using namespace boost::adaptors::action;
 }
+namespace details
+{
+    template < typename Value >
+    struct Repeat
+    {
+    public:
+        explicit Repeat( const Value& v ) : m_v( v ) {}
+        const Value& operator()( int ) const { return m_v; }
+
+    private:
+        Value m_v;
+    };
+}
 namespace view
 {
     using namespace boost::adaptors;
 
-
     template < class Range1 >
-    Range1 concat(const Range1& r1)
+    Range1 concat( const Range1& r1 )
     {
         return r1;
     }
 
     template < class Range1, class Range2, class... RangeN >
-    auto concat( Range1& r1 , Range2& r2, RangeN&... rn )
+    auto concat( Range1& r1, Range2& r2, RangeN&... rn )
     {
-        return boost::range::join(r1, concat( r2, rn...));
+        return boost::range::join( r1, concat( r2, rn... ) );
+    }
+
+    template < typename Value >
+    auto repeat_n( const Value& v, std::ptrdiff_t n )
+    {
+        return boost::counting_range( std::ptrdiff_t(), n ) |
+               transformed( details::Repeat< Value >( v ) );
+    }
+
+    template < typename Value >
+    auto single( const Value& v )
+    {
+        return repeat_n( v, 1 );
     }
 }
 
 auto dates( unsigned short start, unsigned short stop )
 {
-    return boost::counting_range( date{start, greg::Jan, 1}, // view::iota
-                                  date{stop, greg::Jan, 1} );
+    return view::iota( date_by_day{start, greg::Jan, 1},
+                       date_by_day{stop, greg::Jan, 1} );
 }
 
-
-auto by_month() {
-    return view::grouped_by(
-        []( date a, date b ) { return a.month() == b.month(); } );
+struct by_month_op
+{
+    bool operator()( date a, date b ) const { return a.month() == b.month(); }
+};
+auto by_month()
+{
+    return view::grouped_by( by_month_op() );
 }
 
-
-auto by_week() {
-    // Mon-Sun
-    return view::grouped_by(
-        []( date a, date b ) { return a.week_number() == b.week_number(); } );
+struct by_week_op
+{
+    bool operator()( date a, date b ) const
+    {
+        // Mon-Sun
+        return a.week_number() == b.week_number();
+    }
+};
+auto by_week()
+{
+    return view::grouped_by( by_week_op() );
 }
 
+struct month_by_week_op
+{
+    template < typename Month >
+    auto operator()( Month month ) const
+    {
+        return month | by_week();
+    }
+};
 auto month_by_week()
 {
-    return view::transformed(
-        [](auto month){ return month | by_week(); }
-        );
+    return view::transformed( month_by_week_op() );
 }
 
-std::string format_day(date d) {
-    return boost::str(boost::format("%|3|") % d.day());
-}
-
-int position_day_in_week(date d)
+int position_day_in_week( date d )
 {
     typedef greg::gregorian_calendar::day_of_week_type day_t;
 
     day_t monday = boost::date_time::Monday;
     day_t current = d.day_of_week();
-    
+
     // adjust the day so monday is in position 0.
     // days are in [0,7) using modulo on positive numbers
     return ( (int)current - (int)monday + 7 ) % 7;
 }
 
+std::string format_day( date d )
+{
+    return boost::str( boost::format( "%|3|" ) % d.day() );
+}
+
+struct format_weeks_op
+{
+    template < typename Week >
+    auto operator()( Week week ) const
+    {
+        return boost::str(
+            boost::format( "%1%%2%%|22t|" ) %
+            std::string( position_day_in_week( front( week ) ) * 3, ' ' ) %
+            ( week | view::transformed( format_day ) | action::joined ) );
+    }
+};
 // In:  Range<Range<date>>: month grouped by weeks.
 // Out: Range<std::string>: month with formatted weeks.
 auto format_weeks()
 {
-    return view::transformed( []( /*Range<date>*/ auto week ) {
-        return boost::str(
-            boost::format( "%1%%2%%|22t|" ) %
-            std::string(position_day_in_week( front( week ) ) * 3, ' ' ) %
-            ( week | view::transformed( format_day ) | action::joined ) );
-    } );
+    return view::transformed( format_weeks_op() );
 }
 
 // Return a formatted string with the title of the month
@@ -137,73 +172,43 @@ std::string month_title( date d )
     return boost::str( boost::format( "%|=22|" ) % d.month().as_long_string() );
 }
 
+struct layout_months_op
+{
+    template < typename Month >
+    auto operator()( Month month ) const
+    {
+        int week_count = boost::distance( month | by_week() );
+        return view::concat(
+            view::single( month_title( front( month ) ) ),
+            month | by_week() | format_weeks(),
+            view::repeat_n( std::string( 22, ' ' ), 6 - week_count ) );
+    }
+};
 // In:  Range<Range<date>>: year of months of days
 // Out: Range<Range<std::string>>: year of months of formatted wks
 auto layout_months()
 {
-    return view::transformed( []( /*Range<date>*/ auto month ) {
-        return month | by_week() | format_weeks();
-    } );
+    return view::transformed( layout_months_op() );
 }
 
-//auto layout_months()
-//{
-//    return view::transform( []( /*Range<date>*/ auto month ) {
-//        int week_count = distance( month | by_week() );
-//        return view::concat(
-//            view::single( month_title( front( month ) ) ),
-//            month | by_week() | format_weeks(),
-//            view::repeat_n( std::string( 22, ' ' ), 6 - week_count ) );
-//    } );
-//}
-
-//#define RUN_TEST 1
-#ifndef RUN_TEST
 int main()
 {
-    std::vector< std::string > str1;
-    auto str2 = (str1 | action::joined);
+    // run_tests();
 
-    auto year = dates(2015, 2016) | by_month() | layout_months();
-    for (auto month : year )
+    std::vector< std::string > str1;
+    auto str2 = ( str1 | action::joined );
+
+    auto year = dates( 2015, 2016 ) | by_month() | layout_months();
+    for ( auto month : year )
     {
-        for (auto week : month)
+        for ( auto& week : month )
         {
             std::cout << week << "\n";
         }
         std::cout << "---------------------------\n";
     }
 
-    //for (auto month : year | by_month())
-    //{
-    //    auto cc = view::concat(
-    //        view::single(month_title(front(month))),
-    //        month | by_week() | format_weeks()
-    //        );
-    //}
-    //for ( auto month : year |  )
-    //{
-
-    //    //auto weektr = month | format_weeks();
-    //    //auto rng = (month | view::transformed([]( /*Range<date>*/ auto week) {
-    //    //    return *boost::begin( week ); }));
-    //    //date a = *boost::begin(rng);
-
-    //    for ( auto week : month )
-    //    {
-    //        //auto weekStr2 = boost::str(
-    //        //    boost::format("%1%%2%%|22t|") %
-    //        //    std::string((int)front(week).day_of_week() * 3, ' ') %
-    //        //    (week | view::transformed(format_day) | action::joined));
-
-    //        //auto weekStr = (week | view::transformed(format_day) | action::joined);
-    //        //auto weektr = week | format_weeks();
-    //        std::cout << weekStr << "\n";
-    //    }
-    //    std::cout << "---------------------------\n";
-    //}
-
     std::cout << std::endl;
+
     return 0;
 }
-#endif

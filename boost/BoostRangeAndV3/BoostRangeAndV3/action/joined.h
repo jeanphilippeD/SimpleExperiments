@@ -38,7 +38,7 @@ namespace boost
             ForwardRng& rng,
             const join_forwarder& /* tag */ )
         {
-            // BOOST_RANGE_CONCEPT_ASSERT((ForwardRangeConcept<ForwardRng>));
+            BOOST_RANGE_CONCEPT_ASSERT( (ForwardRangeConcept< ForwardRng >));
 
             return join_with_push_back< ForwardRng >()( rng );
         }
@@ -48,8 +48,8 @@ namespace boost
             const ForwardRng& rng,
             const join_forwarder& /*tag*/ )
         {
-            // BOOST_RANGE_CONCEPT_ASSERT((ForwardRangeConcept<const
-            // ForwardRng>));
+            BOOST_RANGE_CONCEPT_ASSERT(
+                (ForwardRangeConcept< const ForwardRng >));
 
             return join_with_push_back< const ForwardRng >()( rng );
         }

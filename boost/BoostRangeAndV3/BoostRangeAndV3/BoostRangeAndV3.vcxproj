@@ -150,13 +150,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="action\joined.h" />
+    <ClInclude Include="date_by_day.h" />
     <ClInclude Include="grouped_by.h" />
+    <ClInclude Include="iota.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoostRangeAndV3.cpp" />
+    <ClCompile Include="date_by_day.cpp" />
     <ClCompile Include="grouped_by.cpp" />
+    <ClCompile Include="iota.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
