@@ -21,6 +21,7 @@
     </ClInclude>
     <ClInclude Include="iota.h" />
     <ClInclude Include="date_by_day.h" />
+    <ClInclude Include="chunked.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -28,5 +29,6 @@
     <ClCompile Include="grouped_by.cpp" />
     <ClCompile Include="iota.cpp" />
     <ClCompile Include="date_by_day.cpp" />
+    <ClCompile Include="chunked.cpp" />
   </ItemGroup>
 </Project>

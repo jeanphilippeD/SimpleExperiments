@@ -15,9 +15,11 @@
 #include <vector>
 #include <iostream>
 
+#define RUN_TEST 1
 void run_grouped_by_test();
 void run_date_by_day_test();
 void run_iota_test();
+void run_chunked_test();
 
 namespace greg = boost::gregorian;
 using date = greg::date;
@@ -28,9 +30,10 @@ namespace
 {
     void run_tests()
     {
-        run_grouped_by_test();
-        run_date_by_day_test();
-        run_iota_test();
+        //run_grouped_by_test();
+        //run_date_by_day_test();
+        //run_iota_test();
+        run_chunked_test();
     }
 
     // return by value, not the most efficient but safer.
@@ -191,13 +194,8 @@ auto layout_months()
     return view::transformed( layout_months_op() );
 }
 
-int main()
+void print_calendar()
 {
-    // run_tests();
-
-    std::vector< std::string > str1;
-    auto str2 = ( str1 | action::joined );
-
     auto year = dates( 2015, 2016 ) | by_month() | layout_months();
     for ( auto month : year )
     {
@@ -209,6 +207,14 @@ int main()
     }
 
     std::cout << std::endl;
+}
 
+int main()
+{
+#ifdef RUN_TEST
+    run_tests();
+#else
+    print_calendar();
+#endif
     return 0;
 }

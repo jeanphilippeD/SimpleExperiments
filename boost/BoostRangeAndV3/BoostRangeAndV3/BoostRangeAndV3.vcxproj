@@ -150,6 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="action\joined.h" />
+    <ClInclude Include="chunked.h" />
     <ClInclude Include="date_by_day.h" />
     <ClInclude Include="grouped_by.h" />
     <ClInclude Include="iota.h" />
@@ -158,6 +159,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BoostRangeAndV3.cpp" />
+    <ClCompile Include="chunked.cpp" />
     <ClCompile Include="date_by_day.cpp" />
     <ClCompile Include="grouped_by.cpp" />
     <ClCompile Include="iota.cpp" />

@@ -4,63 +4,78 @@
 #include <vector>
 #include <iostream>
 
-void RunTest()
+namespace
 {
-    std::vector< int > v = {1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 7};
-    typedef boost::range_detail::group_by_iterator<
-        std::equal_to< int >,
-        std::vector< int >::const_iterator > Iter;
-
-    std::equal_to< int > pred;
-
-    Iter it1( pred, v.begin(), v.end() );
-    Iter it2( pred, v.end(), v.end() );
-
-    if ( it1 == it2 )
-        std::cout << "equals" << std::endl;
-
-    for ( auto it = it1; it != it2; ++it )
+    void RunTest()
     {
-        for ( auto val : *it )
+        std::vector< int > v = {1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 7};
+        const std::vector< int > cv = v;
+
+        typedef boost::range_detail::group_by_iterator<
+            std::equal_to< int >,
+            std::vector< int >::const_iterator > Iter;
+
+        std::equal_to< int > pred;
+
+        Iter it1( pred, v.begin(), v.end() );
+        Iter it2( pred, v.end(), v.end() );
+
+        if ( it1 == it2 )
+            std::cout << "equals" << std::endl;
+
+        for ( auto it = it1; it != it2; ++it )
         {
-            std::cout << val;
+            for ( auto val : *it )
+            {
+                std::cout << val;
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
-    }
 
-    typedef boost::range_detail::group_by_range< std::equal_to< int >,
-                                                 std::vector< int > > Range;
+        typedef boost::range_detail::group_by_range< std::equal_to< int >,
+                                                     std::vector< int > > Range;
 
-    Range rng( pred, v );
-    for ( auto sub : rng )
-    {
-        for ( auto val : sub )
+        Range rng( pred, v );
+        for ( auto sub : rng )
         {
-            std::cout << val;
+            for ( auto val : sub )
+            {
+                std::cout << val;
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
-    }
 
-    for ( auto sub : v | boost::adaptors::grouped_by( pred ) )
-    {
-        for ( auto val : sub )
+        for ( auto sub : v | boost::adaptors::grouped_by( pred ) )
         {
-            std::cout << val;
+            for ( auto val : sub )
+            {
+                std::cout << val;
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
+
+        for ( auto sub : cv | boost::adaptors::grouped_by( pred ) )
+        {
+        }
+        for ( auto sub : boost::adaptors::group_by( v, pred ) )
+        {
+        }
+        for ( auto sub : boost::adaptors::group_by( cv, pred ) )
+        {
+        }
+
+        using namespace boost::adaptors;
+
+        std::vector< int > input;
+
+        std::cout << "Not eq " << std::endl;
+        boost::copy( v | adjacent_filtered( std::not_equal_to< int >() ),
+                     std::ostream_iterator< int >( std::cout, "," ) );
+
+        std::cout << "eq " << std::endl;
+        boost::copy( v | adjacent_filtered( std::equal_to< int >() ),
+                     std::ostream_iterator< int >( std::cout, "," ) );
     }
-
-    using namespace boost::adaptors;
-
-    std::vector< int > input;
-
-    std::cout << "Not eq " << std::endl;
-    boost::copy( v | adjacent_filtered( std::not_equal_to< int >() ),
-                 std::ostream_iterator< int >( std::cout, "," ) );
-
-    std::cout << "eq " << std::endl;
-    boost::copy( v | adjacent_filtered( std::equal_to< int >() ),
-                 std::ostream_iterator< int >( std::cout, "," ) );
 }
 
 void run_grouped_by_test()

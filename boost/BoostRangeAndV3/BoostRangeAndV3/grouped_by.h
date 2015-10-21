@@ -175,7 +175,7 @@ namespace boost
                 (ForwardRangeConcept< const ForwardRng >));
 
             return group_by_range< BinPredicate, const ForwardRng >(
-                step, group_by_pred );
+                group_by_pred, rng );
         }
 
     } // namespace 'adaptors'
