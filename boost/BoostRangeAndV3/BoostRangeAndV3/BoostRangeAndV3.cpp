@@ -20,6 +20,7 @@ void run_grouped_by_test();
 void run_date_by_day_test();
 void run_iota_test();
 void run_chunked_test();
+void run_interleaved_test();
 
 namespace greg = boost::gregorian;
 using date = greg::date;
@@ -33,7 +34,8 @@ namespace
         //run_grouped_by_test();
         //run_date_by_day_test();
         //run_iota_test();
-        run_chunked_test();
+        //run_chunked_test();
+        run_interleaved_test();
     }
 
     // return by value, not the most efficient but safer.
