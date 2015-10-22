@@ -11,9 +11,9 @@ namespace
         std::vector< int > v = {1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 7};
         const std::vector< int > cv = v;
 
-        typedef boost::range_detail::group_by_iterator<
+        typedef boost::range_detail::view::group_by_iterator<
             std::equal_to< int >,
-            std::vector< int >::const_iterator > Iter;
+            std::vector< int >::iterator > Iter;
 
         std::equal_to< int > pred;
 
@@ -32,8 +32,8 @@ namespace
             std::cout << std::endl;
         }
 
-        typedef boost::range_detail::group_by_range< std::equal_to< int >,
-                                                     std::vector< int > > Range;
+        typedef boost::view::group_by_range< std::equal_to< int >,
+                                             std::vector< int > > Range;
 
         Range rng( pred, v );
         for ( auto sub : rng )
@@ -45,7 +45,7 @@ namespace
             std::cout << std::endl;
         }
 
-        for ( auto sub : v | boost::adaptors::grouped_by( pred ) )
+        for ( auto sub : v | boost::adaptors::view::grouped_by( pred ) )
         {
             for ( auto val : sub )
             {
@@ -54,13 +54,13 @@ namespace
             std::cout << std::endl;
         }
 
-        for ( auto sub : cv | boost::adaptors::grouped_by( pred ) )
+        for ( auto sub : cv | boost::adaptors::view::grouped_by( pred ) )
         {
         }
-        for ( auto sub : boost::adaptors::group_by( v, pred ) )
+        for ( auto sub : boost::adaptors::view::group_by( v, pred ) )
         {
         }
-        for ( auto sub : boost::adaptors::group_by( cv, pred ) )
+        for ( auto sub : boost::adaptors::view::group_by( cv, pred ) )
         {
         }
 

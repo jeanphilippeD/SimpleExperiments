@@ -8,6 +8,7 @@
 #include "grouped_by.h"
 #include "interleaved.h"
 #include "iota.h"
+#include "joined.h"
 #include "boost\date_time\gregorian\gregorian.hpp"
 #include "boost\format.hpp"
 #include "boost\range.hpp"
@@ -17,7 +18,7 @@
 #include <vector>
 #include <iostream>
 
-#define RUN_TEST 1
+//#define RUN_TEST 1
 void run_grouped_by_test();
 void run_date_by_day_test();
 void run_iota_test();
@@ -34,11 +35,11 @@ namespace
 {
     void run_tests()
     {
-        //run_grouped_by_test();
-        //run_date_by_day_test();
-        //run_iota_test();
-        //run_chunked_test();
-        //run_interleaved_test();
+        run_grouped_by_test();
+        run_date_by_day_test();
+        run_iota_test();
+        run_chunked_test();
+        run_interleaved_test();
         run_joined_test();
     }
 
@@ -70,7 +71,10 @@ namespace details
 }
 namespace view
 {
-    using namespace boost::adaptors;
+    const auto transformed = boost::adaptors::transformed;
+    const auto filtered = boost::adaptors::filtered;
+
+    using namespace boost::adaptors::view;
 
     template < class Range1 >
     Range1 concat( const Range1& r1 )
@@ -208,14 +212,16 @@ struct transpose_op
     auto operator()( ForwardRng&& rngs ) const
     {
         BOOST_RANGE_CONCEPT_ASSERT( (boost::ForwardRangeConcept< ForwardRng >));
-        BOOST_RANGE_CONCEPT_ASSERT(
-            (boost::ForwardRangeConcept< typename ForwardRng::value_type >));
 
-        return std::forward< ForwardRng >( rngs ) | interleave() |
-               chunk( distance( rngs ) );
+        // typedef typename ForwardRng::value_type iner_range_t;
+        // BOOST_RANGE_CONCEPT_ASSERT(
+        //    (boost::ForwardRangeConcept< iner_range_t >));
+
+        return std::forward< ForwardRng >( rngs ) | view::interleaved |
+               view::chunked( distance( rngs ) );
     }
 };
-const transpose_op transpose = transpose_op();
+const transpose_op transposed = transpose_op();
 
 template < class ForwardRng >
 inline auto operator|( ForwardRng& rng, const transpose_op& transpose_object )
@@ -223,39 +229,44 @@ inline auto operator|( ForwardRng& rng, const transpose_op& transpose_object )
     return transpose_object( rng );
 }
 
-
 struct transpose_months_op
 {
     template < typename ForwardRng /*Range<Range<string>>*/ >
-    auto operator()(ForwardRng rng) const
+    auto operator()( ForwardRng rng ) const
     {
-        return rng | transpose();
+        return rng | transposed;
     }
 };
 // In:  Range<Range<Range<string>>>
 // Out: Range<Range<Range<string>>>, transposing months.
-auto transpose_months() {
+auto transpose_months()
+{
     return view::transformed( transpose_months_op() );
 }
 
 struct join_months_op
 {
     template < typename ForwardRng /*Range<string>*/ >
-    auto operator()(ForwardRng rng) const
+    auto operator()( ForwardRng rng ) const
     {
-        return action::join(rng);
+        return action::join( rng );
     }
 };
 // In:  Range<Range<string>>
 // Out: Range<string>, joining the strings of the inner ranges
-auto join_months() {
+auto join_months()
+{
     return view::transformed( join_months_op() );
 }
 
 void print_calendar()
 {
-    auto year = dates( 2015, 2016 ) | by_month() | layout_months();
-    for ( auto month : year )
+    // boost::copy( dates( 2015, 2016 ) | by_month() | layout_months() |
+    //                 view::chunked( 3 ) | transpose_months() | view::joined |
+    //                 join_months(),
+    //             std::ostream_iterator<>( std::cout, "\n" ) );
+
+    for ( auto month : dates( 2015, 2016 ) | by_month() | layout_months() )
     {
         for ( auto& week : month )
         {

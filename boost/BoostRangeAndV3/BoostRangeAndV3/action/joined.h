@@ -9,82 +9,86 @@ namespace boost
 {
     namespace range_detail
     {
-        //
-        // This is a quick implementation.
-        // It is not very generic and would need to be improved.
-        //
-        template < typename Range >
-        struct join_with_push_back
+        namespace action
         {
-            typedef typename Range::value_type value_type;
-
-            value_type operator()( Range rng )
+            //
+            // This is a quick implementation.
+            // It is not very generic and would need to be improved.
+            //
+            template < typename Range >
+            struct join_with_push_back
             {
-                value_type result;
-                for ( auto&& val : rng )
+                typedef typename Range::value_type value_type;
+
+                value_type operator()( Range rng )
                 {
-                    boost::range::push_back( result, val );
+                    value_type result;
+                    for ( auto&& val : rng )
+                    {
+                        boost::range::push_back( result, val );
+                    }
+                    return result;
                 }
-                return result;
+            };
+
+            struct join_forwarder
+            {
+            };
+
+            template < class ForwardRng >
+            inline typename join_with_push_back< ForwardRng >::value_type
+            operator|( ForwardRng& rng, const join_forwarder& /* tag */ )
+            {
+                BOOST_RANGE_CONCEPT_ASSERT(
+                    (ForwardRangeConcept< ForwardRng >));
+
+                return join_with_push_back< ForwardRng >()( rng );
             }
-        };
 
-        struct join_forwarder
-        {
-        };
+            template < class ForwardRng >
+            inline typename join_with_push_back< ForwardRng >::value_type
+            operator|( const ForwardRng& rng, const join_forwarder& /*tag*/ )
+            {
+                BOOST_RANGE_CONCEPT_ASSERT(
+                    (ForwardRangeConcept< const ForwardRng >));
 
-        template < class ForwardRng >
-        inline typename join_with_push_back< ForwardRng >::value_type operator|(
-            ForwardRng& rng,
-            const join_forwarder& /* tag */ )
-        {
-            BOOST_RANGE_CONCEPT_ASSERT( (ForwardRangeConcept< ForwardRng >));
+                return join_with_push_back< const ForwardRng >()( rng );
+            }
+        } // namespace action
+    }     // namespace range_detail
 
-            return join_with_push_back< ForwardRng >()( rng );
-        }
-
-        template < class ForwardRng >
-        inline typename join_with_push_back< ForwardRng >::value_type operator|(
-            const ForwardRng& rng,
-            const join_forwarder& /*tag*/ )
-        {
-            BOOST_RANGE_CONCEPT_ASSERT(
-                (ForwardRangeConcept< const ForwardRng >));
-
-            return join_with_push_back< const ForwardRng >()( rng );
-        }
-    }
     namespace adaptors
     {
         namespace action
         {
             namespace
             {
-                const range_detail::join_forwarder joined =
-                    range_detail::join_forwarder();
+                const range_detail::action::join_forwarder joined =
+                    range_detail::action::join_forwarder();
             }
 
             template < class ForwardRng >
-            inline typename range_detail::join_with_push_back<
+            inline typename range_detail::action::join_with_push_back<
                 ForwardRng >::value_type
             join( ForwardRng& rng )
             {
                 BOOST_RANGE_CONCEPT_ASSERT(
                     (ForwardRangeConcept< ForwardRng >));
 
-                return range_detail::join_with_push_back()< ForwardRng >( rng );
+                return range_detail::action::join_with_push_back()<
+                    ForwardRng >( rng );
             }
 
             template < class ForwardRng >
-            inline typename range_detail::join_with_push_back<
+            inline typename range_detail::action::join_with_push_back<
                 ForwardRng >::value_type
             join( const ForwardRng& rng )
             {
                 BOOST_RANGE_CONCEPT_ASSERT(
                     (ForwardRangeConcept< const ForwardRng >));
 
-                return range_detail::join_with_push_back()< const ForwardRng >(
-                    rng );
+                return range_detail::action::join_with_push_back()<
+                    const ForwardRng >( rng );
             }
         }
     }
