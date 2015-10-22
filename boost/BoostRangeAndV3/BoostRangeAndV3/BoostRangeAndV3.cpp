@@ -2,9 +2,11 @@
 //
 
 #include "stdafx.h"
+#include "chunked.h"
 #include "action\joined.h"
 #include "date_by_day.h"
 #include "grouped_by.h"
+#include "interleaved.h"
 #include "iota.h"
 #include "boost\date_time\gregorian\gregorian.hpp"
 #include "boost\format.hpp"
@@ -21,6 +23,7 @@ void run_date_by_day_test();
 void run_iota_test();
 void run_chunked_test();
 void run_interleaved_test();
+void run_joined_test();
 
 namespace greg = boost::gregorian;
 using date = greg::date;
@@ -35,7 +38,8 @@ namespace
         //run_date_by_day_test();
         //run_iota_test();
         //run_chunked_test();
-        run_interleaved_test();
+        //run_interleaved_test();
+        run_joined_test();
     }
 
     // return by value, not the most efficient but safer.
@@ -194,6 +198,58 @@ struct layout_months_op
 auto layout_months()
 {
     return view::transformed( layout_months_op() );
+}
+
+struct transpose_op
+{
+    // In:  Range<Range<T>>
+    // Out: Range<Range<T>>, transposing the rows and columns.
+    template < typename ForwardRng >
+    auto operator()( ForwardRng&& rngs ) const
+    {
+        BOOST_RANGE_CONCEPT_ASSERT( (boost::ForwardRangeConcept< ForwardRng >));
+        BOOST_RANGE_CONCEPT_ASSERT(
+            (boost::ForwardRangeConcept< typename ForwardRng::value_type >));
+
+        return std::forward< ForwardRng >( rngs ) | interleave() |
+               chunk( distance( rngs ) );
+    }
+};
+const transpose_op transpose = transpose_op();
+
+template < class ForwardRng >
+inline auto operator|( ForwardRng& rng, const transpose_op& transpose_object )
+{
+    return transpose_object( rng );
+}
+
+
+struct transpose_months_op
+{
+    template < typename ForwardRng /*Range<Range<string>>*/ >
+    auto operator()(ForwardRng rng) const
+    {
+        return rng | transpose();
+    }
+};
+// In:  Range<Range<Range<string>>>
+// Out: Range<Range<Range<string>>>, transposing months.
+auto transpose_months() {
+    return view::transformed( transpose_months_op() );
+}
+
+struct join_months_op
+{
+    template < typename ForwardRng /*Range<string>*/ >
+    auto operator()(ForwardRng rng) const
+    {
+        return action::join(rng);
+    }
+};
+// In:  Range<Range<string>>
+// Out: Range<string>, joining the strings of the inner ranges
+auto join_months() {
+    return view::transformed( join_months_op() );
 }
 
 void print_calendar()

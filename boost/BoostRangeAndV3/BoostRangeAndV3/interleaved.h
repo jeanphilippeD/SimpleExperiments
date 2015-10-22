@@ -1,5 +1,5 @@
-#ifndef BOOST_RANGE_ADAPTOR_CHUNKED_HPP_INCLUDED
-#define BOOST_RANGE_ADAPTOR_CHUNKED_HPP_INCLUDED
+#ifndef BOOST_RANGE_ADAPTOR_INTERLEAVED_HPP_INCLUDED
+#define BOOST_RANGE_ADAPTOR_INTERLEAVED_HPP_INCLUDED
 
 #include <boost/range/adaptor/argument_fwd.hpp>
 #include <boost/range/adaptor/transformed.hpp>
@@ -13,16 +13,6 @@ namespace boost
 {
     namespace range_detail
     {
-        template < class Iter >
-        void checked_advance( Iter& it, std::size_t n, const Iter end )
-        {
-            // Non optimized version of std::advance that check for its bound.
-            for ( ; it != end && n > 0; --n )
-            {
-                ++it;
-            }
-        }
-
         template < class Iter >
         class interleave_iterator;
 

@@ -23,6 +23,7 @@
     <ClInclude Include="date_by_day.h" />
     <ClInclude Include="chunked.h" />
     <ClInclude Include="interleaved.h" />
+    <ClInclude Include="joined.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />
@@ -32,5 +33,6 @@
     <ClCompile Include="date_by_day.cpp" />
     <ClCompile Include="chunked.cpp" />
     <ClCompile Include="interleaved.cpp" />
+    <ClCompile Include="joined.cpp" />
   </ItemGroup>
 </Project>
