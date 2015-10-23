@@ -16,7 +16,9 @@ namespace date_ext
 
     public:
         using super_t::super_t;
-        // explicit date_by_day(date d) : date(d) {}
+        date_by_day() : date( boost::date_time::not_a_date_time ) {} // provide
+                                                                     // default
+                                                                     // constructor
 
         date_by_day& operator+=( day dd )
         {

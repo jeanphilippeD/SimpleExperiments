@@ -75,8 +75,8 @@ namespace boost
                 BOOST_RANGE_CONCEPT_ASSERT(
                     (ForwardRangeConcept< ForwardRng >));
 
-                return range_detail::action::join_with_push_back()<
-                    ForwardRng >( rng );
+                return range_detail::action::join_with_push_back<
+                    ForwardRng >()( rng );
             }
 
             template < class ForwardRng >
@@ -87,8 +87,8 @@ namespace boost
                 BOOST_RANGE_CONCEPT_ASSERT(
                     (ForwardRangeConcept< const ForwardRng >));
 
-                return range_detail::action::join_with_push_back()<
-                    const ForwardRng >( rng );
+                return range_detail::action::join_with_push_back<
+                    const ForwardRng >()( rng );
             }
         }
     }

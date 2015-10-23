@@ -40,6 +40,7 @@ namespace boost
 
                 struct negated_pred
                 {
+                    negated_pred() {}
                     explicit negated_pred( Pred pred ) : m_pred( pred ) {}
 
                     template < typename T >

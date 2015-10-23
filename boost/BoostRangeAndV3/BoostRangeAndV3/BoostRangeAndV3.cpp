@@ -261,19 +261,10 @@ auto join_months()
 
 void print_calendar()
 {
-    // boost::copy( dates( 2015, 2016 ) | by_month() | layout_months() |
-    //                 view::chunked( 3 ) | transpose_months() | view::joined |
-    //                 join_months(),
-    //             std::ostream_iterator<>( std::cout, "\n" ) );
-
-    for ( auto month : dates( 2015, 2016 ) | by_month() | layout_months() )
-    {
-        for ( auto& week : month )
-        {
-            std::cout << week << "\n";
-        }
-        std::cout << "---------------------------\n";
-    }
+    boost::copy( dates( 2015, 2016 ) | by_month() | layout_months() |
+                     view::chunked( 3 ) | transpose_months() | view::joined |
+                     join_months(),
+                 std::ostream_iterator< std::string >( std::cout, "\n" ) );
 
     std::cout << std::endl;
 }

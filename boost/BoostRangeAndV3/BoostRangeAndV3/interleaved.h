@@ -49,7 +49,7 @@ namespace boost
                 typedef Iter iter_t;
 
                 interleave_iterator()
-                : m_interleave_size( 0 ), m_it(), m_next(), m_last()
+                : m_its(), m_lasts(), m_current( 0 )
                 {
                 }
 

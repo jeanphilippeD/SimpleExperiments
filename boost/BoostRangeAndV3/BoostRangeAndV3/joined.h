@@ -22,7 +22,7 @@ namespace boost
             struct join_iterator_base_gen
             {
                 typedef typename Iter::value_type sub_range_t;
-                typedef decltype( boost::begin( sub_range_t() ) ) sub_iter_t;
+                typedef decltype( boost::begin( *Iter() ) ) sub_iter_t;
 
                 typedef typename sub_iter_t::value_type value_type;
 
