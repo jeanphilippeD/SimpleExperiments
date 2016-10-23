@@ -24,44 +24,6 @@ namespace boost
     namespace range_detail
     {
 
-// Lambda are not copy/move assignable.
-// it is useful to be able to assign iterator even if they
-// contain lambdas, this ensure assignment is done throug
-// construction
-template< typename T >
-class optional_assignable : public boost::optional< T >
-{
-    const boost::optional< T >& as_base(const optional_assignable& rhs)
-    {
-        return rhs;
-    }
-
-public:
-    optional_assignable()
-    {
-    }
-
-    optional_assignable(const T& source) :
-    boost::optional< T >( source )
-    {
-    }
-
-    optional_assignable(const optional_assignable& rhs) :
-        boost::optional< T >(as_base(rhs))
-    {
-    }
-
-    optional_assignable& operator=(const optional_assignable& rhs)
-    {
-        destroy();
-        if (rhs.is_initialized())
-        {
-            construct(rhs.get_impl());
-        }
-        return *this;
-    }
-};
-
 template<typename F, typename R>
 class default_constructible_fn_wrapper
 {
@@ -74,6 +36,25 @@ public:
     default_constructible_fn_wrapper(const F& source)
         : m_impl(source)
     {
+    }
+    default_constructible_fn_wrapper(const default_constructible_fn_wrapper& source)
+        : m_impl(source.m_impl)
+    {
+    }
+    default_constructible_fn_wrapper& operator=(const default_constructible_fn_wrapper& source)
+    {
+        if (source.m_impl)
+        {
+            // Lambda are not copy/move assignable.
+            // If T is not MoveAssignable, it is still possible to reset the value of
+            // optional<T> using function emplace()
+            m_impl.emplace(*source.m_impl);
+        }
+        else
+        {
+            m_impl.reset();
+        }
+        return *this;
     }
 
     template<typename Arg>
@@ -102,7 +83,7 @@ public:
         return (*m_impl)(arg1, arg2);
     }
 private:
-    optional_assignable<F> m_impl;
+    boost::optional<F> m_impl;
 };
 
 template<typename F, typename R>
@@ -134,7 +115,6 @@ public:
     {
     }
 };
-
 
 template<typename F, typename R>
 struct default_constructible_unary_fn_gen :
