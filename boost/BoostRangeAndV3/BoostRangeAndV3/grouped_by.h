@@ -1,7 +1,6 @@
 #ifndef BOOST_RANGE_ADAPTOR_GROUPED_BY_HPP_INCLUDED
 #define BOOST_RANGE_ADAPTOR_GROUPED_BY_HPP_INCLUDED
 
-#include "default_constructible_fn.hpp"
 #include <boost/range/adaptor/adjacent_filtered.hpp>
 #include <boost/range/adaptor/argument_fwd.hpp>
 #include <boost/range/adaptor/filtered.hpp>

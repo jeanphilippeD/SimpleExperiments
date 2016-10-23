@@ -67,21 +67,6 @@ private:
 };
 
 template<typename F, typename R>
-class default_constructible_unary_fn_wrapper_v2 :
-    public default_constructible_fn_wrapper<F, R>
-{
-public:
-    default_constructible_unary_fn_wrapper_v2()
-    {
-    }
-
-    default_constructible_unary_fn_wrapper_v2(const F& source)
-        : default_constructible_fn_wrapper(source)
-    {
-    }
-};
-
-template<typename F, typename R>
 struct default_constructible_fn_gen
 {
     typedef typename boost::mpl::if_<
@@ -91,12 +76,33 @@ struct default_constructible_fn_gen
     >::type type;
 };
 
+
+#ifndef BOOST_RANGE_DETAIL_DEFAULT_CONSTRUCTIBLE_UNARY_FN_HPP_INCLUDED
+#define BOOST_RANGE_DETAIL_DEFAULT_CONSTRUCTIBLE_UNARY_FN_HPP_INCLUDED
+// Hack: Patch boost locally Replace in all algoritm: need to be included first
+
 template<typename F, typename R>
-struct default_constructible_unary_fn_gen_v2 :
+class default_constructible_unary_fn_wrapper :
+    public default_constructible_fn_wrapper<F, R>
+{
+public:
+    default_constructible_unary_fn_wrapper()
+    {
+    }
+
+    default_constructible_unary_fn_wrapper(const F& source)
+        : default_constructible_fn_wrapper(source)
+    {
+    }
+};
+
+
+template<typename F, typename R>
+struct default_constructible_unary_fn_gen :
     default_constructible_fn_gen< F, R >
 {
 };
-
+#endif
     } // namespace range_detail
 } // namespace boost
 

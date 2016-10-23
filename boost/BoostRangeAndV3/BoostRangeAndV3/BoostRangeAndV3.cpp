@@ -114,7 +114,10 @@ struct by_month_op
 };
 auto by_month()
 {
-    return view::grouped_by( by_month_op() );
+    return view::grouped_by(
+        // []( date a, date b ) { return a.month() == b.month(); } //
+        by_month_op() //
+    );
 }
 
 struct by_week_op
