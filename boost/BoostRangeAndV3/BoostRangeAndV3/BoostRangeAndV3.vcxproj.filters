@@ -24,6 +24,7 @@
     <ClInclude Include="chunked.h" />
     <ClInclude Include="interleaved.h" />
     <ClInclude Include="joined.h" />
+    <ClInclude Include="default_constructible_fn.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

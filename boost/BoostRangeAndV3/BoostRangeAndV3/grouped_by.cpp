@@ -6,16 +6,15 @@
 
 namespace
 {
-    void RunTest()
+    template< typename Pred >
+    void RunTest( Pred pred )
     {
         std::vector< int > v = {1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 7};
         const std::vector< int > cv = v;
 
-        typedef boost::range_detail::view::group_by_iterator<
-            std::equal_to< int >,
-            std::vector< int >::iterator > Iter;
-
-        std::equal_to< int > pred;
+        typedef boost::range_detail::view::
+            group_by_iterator< Pred, std::vector< int >::iterator >
+                Iter;
 
         Iter it1( pred, v.begin(), v.end() );
         Iter it2( pred, v.end(), v.end() );
@@ -32,8 +31,7 @@ namespace
             std::cout << std::endl;
         }
 
-        typedef boost::view::group_by_range< std::equal_to< int >,
-                                             std::vector< int > > Range;
+        typedef boost::view::group_by_range< Pred, std::vector< int > > Range;
 
         Range rng( pred, v );
         for ( auto sub : rng )
@@ -73,12 +71,15 @@ namespace
                      std::ostream_iterator< int >( std::cout, "," ) );
 
         std::cout << "eq " << std::endl;
-        boost::copy( v | adjacent_filtered( std::equal_to< int >() ),
+        boost::copy( v | adjacent_filtered( pred ),
                      std::ostream_iterator< int >( std::cout, "," ) );
     }
 }
 
 void run_grouped_by_test()
 {
-    RunTest();
+    RunTest( std::equal_to< int >() );
+
+    //std::unique_ptr< 
+    RunTest([](int v1, int v2) { return v1 == v2; });
 }

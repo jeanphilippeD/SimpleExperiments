@@ -1,6 +1,7 @@
 #ifndef BOOST_RANGE_ADAPTOR_GROUPED_BY_HPP_INCLUDED
 #define BOOST_RANGE_ADAPTOR_GROUPED_BY_HPP_INCLUDED
 
+#include "default_constructible_fn.hpp"
 #include <boost/range/adaptor/adjacent_filtered.hpp>
 #include <boost/range/adaptor/argument_fwd.hpp>
 #include <boost/range/adaptor/filtered.hpp>
@@ -94,11 +95,20 @@ namespace boost
                 increment_iterator m_next;
             };
 
+            template<typename Pred, typename Iter>
+            struct group_by_range_iterator_gen
+            {
+                typedef group_by_iterator<
+                    typename default_constructible_fn_gen< Pred, bool >::type,
+                    Iter >
+                    type;
+            };
+
             template < class Pred, class Range >
             struct group_by_range
-                : iterator_range< group_by_iterator<
+                : iterator_range< typename group_by_range_iterator_gen<
                       Pred,
-                      typename range_iterator< Range >::type > >
+                      typename range_iterator< Range >::type >::type >
             {
             public:
                 // group_by_range() {}

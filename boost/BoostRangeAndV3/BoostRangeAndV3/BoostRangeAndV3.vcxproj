@@ -152,6 +152,7 @@
     <ClInclude Include="action\joined.h" />
     <ClInclude Include="chunked.h" />
     <ClInclude Include="date_by_day.h" />
+    <ClInclude Include="default_constructible_fn.hpp" />
     <ClInclude Include="grouped_by.h" />
     <ClInclude Include="interleaved.h" />
     <ClInclude Include="iota.h" />
