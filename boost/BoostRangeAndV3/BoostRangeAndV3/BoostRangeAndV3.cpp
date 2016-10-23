@@ -108,42 +108,26 @@ auto dates( unsigned short start, unsigned short stop )
                        date_by_day{stop, greg::Jan, 1} );
 }
 
-struct by_month_op
-{
-    bool operator()( date a, date b ) const { return a.month() == b.month(); }
-};
 auto by_month()
 {
     return view::grouped_by(
-        //[]( date a, date b ) { return a.month() == b.month(); } //
-        by_month_op() //
+        []( date a, date b ) { return a.month() == b.month(); }
     );
 }
 
-struct by_week_op
-{
-    bool operator()( date a, date b ) const
-    {
-        // Mon-Sun
-        return a.week_number() == b.week_number();
-    }
-};
 auto by_week()
 {
-    return view::grouped_by( by_week_op() );
+    return view::grouped_by( []( date a, date b ) {
+        // Mon-Sun
+        return a.week_number() == b.week_number();
+    } );
 }
 
-struct month_by_week_op
-{
-    template < typename Month >
-    auto operator()( Month month ) const
-    {
-        return month | by_week();
-    }
-};
 auto month_by_week()
 {
-    return view::transformed( month_by_week_op() );
+    return view::transformed( []( auto month ) {
+        return month | by_week(); //
+    } );
 }
 
 int position_day_in_week( date d )
@@ -163,22 +147,18 @@ std::string format_day( date d )
     return boost::str( boost::format( "%|3|" ) % d.day() );
 }
 
-struct format_weeks_op
-{
-    template < typename Week >
-    auto operator()( Week week ) const
-    {
-        return boost::str(
-            boost::format( "%1%%2%%|22t|" ) %
-            std::string( position_day_in_week( front( week ) ) * 3, ' ' ) %
-            ( week | view::transformed( format_day ) | action::joined ) );
-    }
-};
 // In:  Range<Range<date>>: month grouped by weeks.
 // Out: Range<std::string>: month with formatted weeks.
 auto format_weeks()
 {
-    return view::transformed( format_weeks_op() );
+    auto format_weeks_op = [](auto week)
+    {
+        return boost::str(
+            boost::format("%1%%2%%|22t|") %
+            std::string(position_day_in_week(front(week)) * 3, ' ') %
+            (week | view::transformed(format_day) | action::joined));
+    };
+    return view::transformed( format_weeks_op );
 }
 
 // Return a formatted string with the title of the month
@@ -188,23 +168,19 @@ std::string month_title( date d )
     return boost::str( boost::format( "%|=22|" ) % d.month().as_long_string() );
 }
 
-struct layout_months_op
-{
-    template < typename Month >
-    auto operator()( Month month ) const
-    {
-        int week_count = boost::distance( month | by_week() );
-        return view::concat(
-            view::single( month_title( front( month ) ) ),
-            month | by_week() | format_weeks(),
-            view::repeat_n( std::string( 22, ' ' ), 6 - week_count ) );
-    }
-};
 // In:  Range<Range<date>>: year of months of days
 // Out: Range<Range<std::string>>: year of months of formatted wks
 auto layout_months()
 {
-    return view::transformed( layout_months_op() );
+    auto layout_months_op = [](auto month)
+    {
+        int week_count = boost::distance(month | by_week());
+        return view::concat(
+            view::single(month_title(front(month))),
+            month | by_week() | format_weeks(),
+            view::repeat_n(std::string(22, ' '), 6 - week_count));
+    };
+    return view::transformed( layout_months_op );
 }
 
 struct transpose_op
@@ -232,34 +208,22 @@ inline auto operator|( ForwardRng& rng, const transpose_op& transpose_object )
     return transpose_object( rng );
 }
 
-struct transpose_months_op
-{
-    template < typename ForwardRng /*Range<Range<string>>*/ >
-    auto operator()( ForwardRng rng ) const
-    {
-        return rng | transposed;
-    }
-};
 // In:  Range<Range<Range<string>>>
 // Out: Range<Range<Range<string>>>, transposing months.
 auto transpose_months()
 {
-    return view::transformed( transpose_months_op() );
+    return view::transformed( []( auto rng /*Range<Range<string>>*/ ) {
+        return rng | transposed; //
+    } );
 }
 
-struct join_months_op
-{
-    template < typename ForwardRng /*Range<string>*/ >
-    auto operator()( ForwardRng rng ) const
-    {
-        return action::join( rng );
-    }
-};
 // In:  Range<Range<string>>
 // Out: Range<string>, joining the strings of the inner ranges
 auto join_months()
 {
-    return view::transformed( join_months_op() );
+    return view::transformed( []( auto rng /*Range<string>*/ ) {
+        return action::join( rng ); //
+    } );
 }
 
 void print_calendar()
