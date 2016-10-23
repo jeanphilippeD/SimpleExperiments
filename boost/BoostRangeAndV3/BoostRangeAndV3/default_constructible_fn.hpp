@@ -24,6 +24,44 @@ namespace boost
     namespace range_detail
     {
 
+// Lambda are not copy/move assignable.
+// it is useful to be able to assign iterator even if they
+// contain lambdas, this ensure assignment is done throug
+// construction
+template< typename T >
+class optional_assignable : public boost::optional< T >
+{
+    const boost::optional< T >& as_base(const optional_assignable& rhs)
+    {
+        return rhs;
+    }
+
+public:
+    optional_assignable()
+    {
+    }
+
+    optional_assignable(const T& source) :
+    boost::optional< T >( source )
+    {
+    }
+
+    optional_assignable(const optional_assignable& rhs) :
+        boost::optional< T >(as_base(rhs))
+    {
+    }
+
+    optional_assignable& operator=(const optional_assignable& rhs)
+    {
+        destroy();
+        if (rhs.is_initialized())
+        {
+            construct(rhs.get_impl());
+        }
+        return *this;
+    }
+};
+
 template<typename F, typename R>
 class default_constructible_fn_wrapper
 {
@@ -37,6 +75,7 @@ public:
         : m_impl(source)
     {
     }
+
     template<typename Arg>
     R operator()(const Arg& arg) const
     {
@@ -63,7 +102,7 @@ public:
         return (*m_impl)(arg1, arg2);
     }
 private:
-    boost::optional<F> m_impl;
+    optional_assignable<F> m_impl;
 };
 
 template<typename F, typename R>

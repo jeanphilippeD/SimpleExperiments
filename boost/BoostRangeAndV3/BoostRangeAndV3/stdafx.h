@@ -10,6 +10,8 @@
 #include <stdio.h>
 #include <tchar.h>
 
+#pragma warning(disable:4503)
+
 #include "default_constructible_fn.hpp"
 
 // TODO: reference additional headers your program requires here

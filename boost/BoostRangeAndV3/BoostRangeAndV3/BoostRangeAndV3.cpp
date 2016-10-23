@@ -115,7 +115,7 @@ struct by_month_op
 auto by_month()
 {
     return view::grouped_by(
-        // []( date a, date b ) { return a.month() == b.month(); } //
+        //[]( date a, date b ) { return a.month() == b.month(); } //
         by_month_op() //
     );
 }
